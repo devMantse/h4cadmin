@@ -1,18 +1,23 @@
-import { Routes, Route, Navigate, NavLink, useLocation } from 'react-router-dom'
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Toaster } from 'react-hot-toast'
-import Dashboard from './pages/Dashboard'
-import Causes from './pages/Causes'
-import Volunteers from './pages/Volunteers'
-import Events from './pages/Events'
-import Blogs from './pages/Blogs'
-import Testimonials from './pages/Testimonials'
-import Media from './pages/Media'
-import Contact from './pages/Contact'
-import Login from './pages/Login'
-import Protected from './lib/protected'
 import { AuthProvider, useAuth } from './lib/auth'
+import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+
+import Blogs from './pages/Blogs'
+import Causes from './pages/Causes'
+import Contact from './pages/Contact'
+import Dashboard from './pages/Dashboard'
+import Events from './pages/Events'
+import Login from './pages/Login'
+import Media from './pages/Media'
+import Protected from './lib/protected'
+import PublicRoute from './lib/PublicRoute'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import Testimonials from './pages/Testimonials'
+import { Toaster } from 'react-hot-toast'
+import Volunteers from './pages/Volunteers'
+import { motion } from 'framer-motion'
+import { queryClient } from './lib/query'
+import { useState } from 'react'
 
 const nav = [
   { to: '/dashboard', label: 'Dashboard', icon: '📊' },
@@ -27,7 +32,7 @@ const nav = [
 
 function HeaderRight(){
   const { user, logout, token } = useAuth()
-  const api = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+  const api =  'https://h4cbackend.vercel.app'
   return (
     <div className="flex items-center gap-3 text-sm text-slate-600">
       {token ? (<>
@@ -92,9 +97,16 @@ function Shell(){
         {/* Main */}
         <main className={isAuth ? '' : 'col-span-12 md:col-span-9 lg:col-span-10'}>
           <Routes>
-            {/* Public */}
-            <Route path="/login" element={<Login/>} />
-            {/* Secured */}
+            {/* Public Routes - Only accessible to unauthenticated users */}
+            <Route
+              path="/login"
+              element={
+                <PublicRoute>
+                  <Login/>
+                </PublicRoute>
+              }
+            />
+            {/* Protected Routes - Only accessible to authenticated users */}
             <Route element={<Protected/>}>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<Dashboard/>} />
@@ -116,4 +128,13 @@ function Shell(){
   )
 }
 
-export default function App(){ return (<AuthProvider><Shell/></AuthProvider>) }
+export default function App(){
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <Shell/>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </AuthProvider>
+    </QueryClientProvider>
+  )
+}
