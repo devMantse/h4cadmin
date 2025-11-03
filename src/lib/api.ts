@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const API_URL = (import.meta as any).env.VITE_API_URL || 'https://h4cbackend.vercel.app'
+export const API_URL = (import.meta as any).env.VITE_API_URL || 'https://h4cbackend-three.vercel.app'
 
 export const api = axios.create({
   baseURL: API_URL,
